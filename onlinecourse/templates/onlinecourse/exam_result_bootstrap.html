@@ -38,21 +38,31 @@
 <div class="container-fluid">
     {% if grade > 80 %}
     <div class="alert alert-success">
-        <b>Congratulations, {{ user.name }}!</b> you have passed the exam and completed the course with score {{ grade }} / 100
+        <b>Congratulations, {{ user.first_name }}!</b> you have passed the exam and completed the course with score {{ grade }} / 100
     </div>
         {% else %}
         <div class="alert alert-danger">
-            <b>Failed</b> Sorry {{ user.name }} you failed exam with score {{ grade }} / 100
+            <b>Failed</b> Sorry {{ user.first_name }} you failed exam with score {{ grade }} / 100
         </div>
         <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
         {% endif %}
     <div class="card-columns-vertical mt-1">
         <h5 class="">Exam results</h5>
-        {% for question in course.question_set.all %}
+        {% for question in exam %}
 
         <div class="card mt-1">
-            <div class="card-header"><h5>{{ question.question_text}}</h5></div>
-            <dv style='color: green'></div>
+            <div class="card-header"><h5>{{ question.text }}</h5></div>
+            {% for answer in question.answers %}
+                {% if answer.correct == True and answer.selected == True %}
+                <div class='card-body text-success'>Correct answer: {{ answer.text }}</div>
+                {% elif answer.correct == False and answer.selected == True %}
+                <div class='card-body text-danger'>You selected: {{ answer.text }}</div>
+                {% elif answer.correct == False and answer.selected == False %}
+                <div class='card-body'>{{ answer.text }}</div>
+                {% elif answer.correct == True and answer.selected == False %}
+                <div class='card-body text-warning'>Not selected: {{ answer.text }}</div>
+                {% endif %}
+             {% endfor %}
         </div>
         {% endfor %}
     </div>

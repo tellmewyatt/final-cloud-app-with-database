@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import login, logout, authenticate
+from math import floor
 import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -143,16 +144,24 @@ def show_exam_result(request, course_id, submission_id):
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
     exam = []
-    for question in course.questions.all():
-        for choice in submission.choices.all():
-            questions.append({
-                "question": question.question_text,
-                "correctAnswers": question.choice_set.filter(is_correct=True)
-            })
-            
+    for question in Question.objects.select_related().filter(course = course_id):
+        question_choices = Choice.objects.select_related().filter(question=question)
+        all_ids = question_choices.values_list('id', flat=True)
+        selected_ids = submission.choices.all().values_list('id', flat=True)
+        correct_ids = question_choices.filter(is_correct=True).values_list('id', flat=True)
+        correct = question.is_get_score(selected_ids)
+        choices = []
+        for c_id in all_ids:
+            choices.append({ "correct": c_id in correct_ids, "selected": c_id in selected_ids, 
+            "text": question_choices.filter(id=c_id)[0].choice_text})
+        exam.append({ "text": question.question_text, 
+        "correct": correct,
+        "answers": choices
+        })
     context = {
         "course": course,
         "submission": submission,
-        "grade": 20
+        "exam": exam,
+        "grade": floor(len([q for q in filter(lambda q: q["correct"], exam)])/len(exam)*100)
     }
     return render(request, "onlinecourse/exam_result_bootstrap.html", context)
