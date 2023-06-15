@@ -52,17 +52,19 @@
 
         <div class="card mt-1">
             <div class="card-header"><h5>{{ question.text }}</h5></div>
+            <div class='card-body'>
             {% for answer in question.answers %}
                 {% if answer.correct == True and answer.selected == True %}
-                <div class='card-body text-success'>Correct answer: {{ answer.text }}</div>
+                <div class='text-success'>Correct answer: {{ answer.text }}</div>
                 {% elif answer.correct == False and answer.selected == True %}
-                <div class='card-body text-danger'>You selected: {{ answer.text }}</div>
+                <div class='text-danger'>You selected: {{ answer.text }}</div>
                 {% elif answer.correct == False and answer.selected == False %}
-                <div class='card-body'>{{ answer.text }}</div>
+                <div>{{ answer.text }}</div>
                 {% elif answer.correct == True and answer.selected == False %}
-                <div class='card-body text-warning'>Not selected: {{ answer.text }}</div>
+                <div class='text-warning'>Not selected: {{ answer.text }}</div>
                 {% endif %}
              {% endfor %}
+            </div>
         </div>
         {% endfor %}
     </div>
